@@ -4,10 +4,27 @@ import re
 from io import StringIO, BytesIO
 import os, csv
 
+
 st.set_page_config(page_title="Anki txt to xlsx converter", layout="centered")
 st.title("Anki txt to xlsx converter")
 
-uploaded_file = st.file_uploader("Upload the anki .txt file", type=["txt"])
+# -------------------
+# Instructions
+# -------------------
+st.markdown("""
+### How to Export Your Deck
+
+1. **Press on the settings icon next to the deck**  
+![Step 1](image1.png)
+
+2. **Then select export**  
+![Step 2](image2.png)
+
+3. **Change the format to "Cards in plain text (TXT)", make sure the deck is correct, and UNCHECK "Include HTML"**  
+![Step 3](image3.png)
+""")
+
+uploaded_file = st.file_uploader("Upload your exported tab-separated `.txt` file", type=["txt"])
 
 def clean_preserve_tabs(text: str) -> str:
     # Keep printable ASCII (0x20–0x7E) PLUS tab/newline/carriage return
