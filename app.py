@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import re
 from io import BytesIO
+import os
 
 st.set_page_config(page_title="Anki txt to xlsx converter", layout="centered")
 st.title("Anki txt to xlsx converter")
