@@ -11,7 +11,7 @@ uploaded_file = st.file_uploader("Upload the anki .txt file", type=["txt"])
 
 def clean_text(s):
     # Keep only printable ASCII characters (space to ~)
-    return re.sub(r"[^ -~]", "", s)
+    return re.sub(r"[^\t\n\r\x20-\x7E]", "", text)
 
 if uploaded_file:
     # Derive output file name
