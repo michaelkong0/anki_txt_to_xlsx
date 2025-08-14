@@ -14,13 +14,13 @@ st.title("Anki txt to xlsx converter")
 st.markdown("### How to Export Your Deck")
 
 st.markdown("1. **Press on the settings icon next to the deck**")
-st.image("image1.png", use_column_width=True)
+st.image("image1.png", use_container_width=True)
 
 st.markdown("2. **Then select export**")
-st.image("image2.png", use_column_width=True)
+st.image("image2.png", use_container_width=True)
 
 st.markdown("3. **Change the format to 'Cards in plain text (TXT)', make sure the deck is correct, and UNCHECK 'Include HTML'**")
-st.image("image3.png", use_column_width=True)
+st.image("image3.png", use_container_width=True)
 
 uploaded_file = st.file_uploader("Upload your exported tab-separated `.txt` file", type=["txt"])
 
