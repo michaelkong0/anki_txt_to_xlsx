@@ -3,28 +3,34 @@ import pandas as pd
 import re
 from io import BytesIO
 
-st.set_page_config(page_title="TXT → Spreadsheet Converter", layout="centered")
+st.set_page_config(page_title="Anki txt to xlsx converter", layout="centered")
+st.title("Anki txt to xlsx converter")
 
-st.title("TXT → Spreadsheet Converter")
-
-uploaded_file = st.file_uploader("Upload a tab-separated .txt file", type=["txt"])
+uploaded_file = st.file_uploader("Upload the anki .txt file", type=["txt"])
 
 def clean_text(s):
-    # Keep only basic printable ASCII characters: letters, numbers, punctuation, whitespace
+    # Keep only printable ASCII characters (space to ~)
     return re.sub(r"[^ -~]", "", s)
 
-if uploaded_file is not None:
-    # Read the uploaded file as a string
+if uploaded_file:
+    # Derive output file name
+    base_name = os.path.splitext(uploaded_file.name)[0]
+    output_filename = f"{base_name}.xlsx"
+
+    # Read as text
     text = uploaded_file.read().decode("utf-8", errors="ignore")
+    lines = text.splitlines()
+
+    # Remove first two rows
+    lines = lines[2:]
 
     # Clean each line
-    cleaned_lines = [clean_text(line) for line in text.splitlines()]
+    cleaned_lines = [clean_text(line) for line in lines]
 
-    # Convert to DataFrame (tab-separated)
-    data = [line.split("\t") for line in cleaned_lines]
-    df = pd.DataFrame(data)
+    # Convert to DataFrame with tab as delimiter
+    df = pd.DataFrame([row.split("\t") for row in cleaned_lines])
 
-    st.subheader("Preview of cleaned data")
+    st.subheader("Preview of spreadsheet")
     st.dataframe(df.head())
 
     # Export to Excel
@@ -33,8 +39,8 @@ if uploaded_file is not None:
     output.seek(0)
 
     st.download_button(
-        label="Download as Excel (.xlsx)",
+        label=f"Download {output_filename}",
         data=output,
-        file_name="cleaned_data.xlsx",
+        file_name=output_filename,
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
