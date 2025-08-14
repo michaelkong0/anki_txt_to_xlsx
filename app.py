@@ -1,47 +1,53 @@
 import streamlit as st
 import pandas as pd
-import re
+import re, os, csv
 from io import BytesIO
-import os
 
 st.set_page_config(page_title="Anki txt to xlsx converter", layout="centered")
 st.title("Anki txt to xlsx converter")
 
 uploaded_file = st.file_uploader("Upload the anki .txt file", type=["txt"])
 
-def clean_text(s):
-    # Keep only printable ASCII characters (space to ~)
+def clean_preserve_tabs(text: str) -> str:
+    # Keep printable ASCII (0x20–0x7E) PLUS tab/newline/carriage return
     return re.sub(r"[^\t\n\r\x20-\x7E]", "", text)
 
 if uploaded_file:
-    # Derive output file name
     base_name = os.path.splitext(uploaded_file.name)[0]
     output_filename = f"{base_name}.xlsx"
 
-    # Read as text
-    text = uploaded_file.read().decode("utf-8", errors="ignore")
-    lines = text.splitlines()
+    # Decode with utf-8 then fallback
+    raw = uploaded_file.read()
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        text = raw.decode("latin-1", errors="ignore")
 
-    # Remove first two rows
-    lines = lines[2:]
+    cleaned = clean_preserve_tabs(text)
 
-    # Clean each line
-    cleaned_lines = [clean_text(line) for line in lines]
+    # Parse as TSV, skipping the first 2 rows
+    df = pd.read_csv(
+        StringIO(cleaned),
+        sep="\t",
+        header=None,
+        skiprows=2,
+        engine="python",
+        dtype=str,
+        quoting=csv.QUOTE_NONE,
+        on_bad_lines="skip",
+    )
+    df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
 
-    # Convert to DataFrame with tab as delimiter
-    df = pd.DataFrame([row.split("\t") for row in cleaned_lines])
+    st.subheader("Preview")
+    st.dataframe(df.head(30), use_container_width=True)
 
-    st.subheader("Preview of spreadsheet")
-    st.dataframe(df.head())
-
-    # Export to Excel
-    output = BytesIO()
-    df.to_excel(output, index=False, header=False)
-    output.seek(0)
-
+    # Download as Excel
+    buf = BytesIO()
+    df.to_excel(buf, index=False, header=False)
+    buf.seek(0)
     st.download_button(
-        label=f"Download {output_filename}",
-        data=output,
+        f"Download {output_filename}",
+        data=buf,
         file_name=output_filename,
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
