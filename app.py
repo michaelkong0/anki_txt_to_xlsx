@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
-import re, os, csv
-from io import BytesIO
+import re
+from io import StringIO, BytesIO
+import os, csv
 
 st.set_page_config(page_title="Anki txt to xlsx converter", layout="centered")
 st.title("Anki txt to xlsx converter")
